@@ -5,15 +5,33 @@
 
 #include "EventDispatcher.h"
 
+extern EventDispatcher<void>* dispatcher;
+
+EventDispatcher<void>* dispatcher = nullptr;
+
 class A
 {
 public:
-    A(int newVal) : value(newVal) {};
+    A(int newVal) : value(newVal) 
+    {
+        std::function<void(void)> triggerCallback = std::bind(&A::TriggeredV, this);
+        dispatcher->SubscribeCallback(triggerCallback);
+    };
     ~A() = default;
 
-    void Triggered()
+    void TriggeredV()
     {
         std::cout << "A triggered " << value << std::endl;
+    };
+
+    void Triggered(int asd)
+    {
+        std::cout << "A triggered " << asd << std::endl;
+    };
+
+    void Triggered(int asd, int dos)
+    {
+        std::cout << "A triggered " << asd << dos << std::endl;
     };
 
 private:
@@ -37,15 +55,28 @@ private:
 
 int main()
 {
+    dispatcher = new  EventDispatcher<void>();
+
     A classA(1);
     B classB(2);
 
-    std::function<void(void)> aTrigger = [&classA]() {classA.Triggered(); };
+    std::function<void(void)> aTrigger = [&classA](void) {classA.TriggeredV(); };
+    std::function<void(int)> aTrigger2 = [&classA](int x) {classA.Triggered(x); };
+    std::function<void(int, int)> aTrigger3 = [&classA](int x, int y) {classA.Triggered(x, y); };
 
-    EventDispatcher<void, void> voidDispatcher;
+    EventDispatcher<void, int> intDispatcher;
+    EventDispatcher<void, int, int> d2;
 
-    voidDispatcher.SubscribeCallback(aTrigger);
+    intDispatcher.SubscribeCallback(aTrigger2);
+    intDispatcher.Call(2);
 
+    d2.SubscribeCallback(aTrigger3);
+    d2.Call(2,3);
+
+    dispatcher->SubscribeCallback(aTrigger);
+    dispatcher->Call();
+
+    delete dispatcher;
 }
 
 // Run program: Ctrl + F5 or Debug > Start Without Debugging menu
