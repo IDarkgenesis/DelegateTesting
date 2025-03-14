@@ -8,7 +8,7 @@ class Delegate
 public:
 	Delegate(std::function<ReturnValue(Arguments...)>& newCallback)
 	{
-		callback = std::move(newCallback);
+		callback = newCallback;
 	};
 
 	Delegate(std::function<ReturnValue(Arguments...)>&& newCallback) 
