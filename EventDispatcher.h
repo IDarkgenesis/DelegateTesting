@@ -1,29 +1,55 @@
 #pragma once
 
 #include "Delegate.h"
-
+#include <list>
 
 template<typename ReturnValue, typename... Arguments>
 class EventDispatcher
 {
 public:
+
 	EventDispatcher() = default;
 	~EventDispatcher() { subscribedCallbacks.clear(); };
 
-	void SubscribeCallback(Delegate<ReturnValue(Arguments...)>& delegate)
+
+	void SubscribeCallback(Delegate<ReturnValue, Arguments...>&& delegate)
 	{
-		subscribedCallbacks.push_back(delegate);
+		subscribedCallbacks.push_back(std::move(delegate));
 	};
 
 	void Call(Arguments... args)
 	{
-		for (const auto& callback : subscribedCallbacks)
+		for (auto callback : subscribedCallbacks)
 		{
-			callback(args...);
+			callback.Call(args...);
 		}
 	};
 
 private:
-	std::vector<Delegate<ReturnValue(Arguments...)>> subscribedCallbacks;
+	std::list<Delegate<ReturnValue, Arguments...>> subscribedCallbacks;
 };
 
+template<>
+class EventDispatcher<void>
+{
+public:
+	EventDispatcher() = default;
+	~EventDispatcher() { subscribedCallbacks.clear(); };
+
+
+	void SubscribeCallback(Delegate<void>&& delegate)
+	{
+		subscribedCallbacks.push_back(std::move(delegate));
+	};
+
+	void Call()
+	{
+		for (auto callback : subscribedCallbacks)
+		{
+			callback.Call();
+		}
+	};
+
+private:
+	std::list<Delegate<void>> subscribedCallbacks;
+};
