@@ -6,6 +6,8 @@ template<typename ReturnValue, typename... Arguments>
 class Delegate 
 {
 public:
+	Delegate() = default;
+
 	Delegate(std::function<ReturnValue(Arguments...)>& newCallback)
 	{
 		callback = newCallback;
