@@ -52,17 +52,20 @@ int main()
     Delegate<void, int, int> delegate2([&foo](int x, int y) {foo.Triggered(x, y); });
     Delegate<void> delegateVoid(function1);
     Delegate<void> delegateVoid2([&foo](void) {foo.TriggeredVoid(); });
+    
+    std::cout << "----- START SINGLE DELEGATES -----\n";
 
     delegate.Call(1, 2);
     delegate2.Call(3, 4);
     delegateVoid.Call();
     delegateVoid2.Call();
 
+    std::cout << "----- END SINGLE DELEGATES -----\n";
+
     std::cout << "----- START VOID DISPATCHER -----\n";
-    
+     
     int callbackID = dispatcher->SubscribeCallback(std::move(delegateVoid));
     dispatcher->Call();
-
     std::cout << "Removing one callback\n";
     
     dispatcher->RemoveCallback(callbackID);
