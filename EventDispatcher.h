@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Delegate.h"
-#include <list>
+#include <map>
 
 template<typename ReturnValue, typename... Arguments>
 class EventDispatcher
@@ -12,21 +12,30 @@ public:
 	~EventDispatcher() { subscribedCallbacks.clear(); };
 
 
-	void SubscribeCallback(Delegate<ReturnValue, Arguments...>&& delegate)
+	int SubscribeCallback(Delegate<ReturnValue, Arguments...>&& delegate)
 	{
-		subscribedCallbacks.push_back(std::move(delegate));
+		subscribedCallbacks.insert({ ++lastID, std::move(delegate) });
+
+		return lastID;
 	};
+
+	void RemoveCallback(int id)
+	{
+		auto iterator = subscribedCallbacks.find(id);
+		if (iterator != subscribedCallbacks.end()) subscribedCallbacks.erase(iterator);
+	}
 
 	void Call(Arguments... args)
 	{
-		for (auto callback : subscribedCallbacks)
+		for (auto& callback : subscribedCallbacks)
 		{
-			callback.Call(args...);
+			callback.second.Call(args...);
 		}
 	};
 
 private:
-	std::list<Delegate<ReturnValue, Arguments...>> subscribedCallbacks;
+	std::map<int, Delegate<ReturnValue, Arguments...>> subscribedCallbacks;
+	int lastID = -1;
 };
 
 template<>
@@ -37,19 +46,28 @@ public:
 	~EventDispatcher() { subscribedCallbacks.clear(); };
 
 
-	void SubscribeCallback(Delegate<void>&& delegate)
+	int SubscribeCallback(Delegate<void>&& delegate)
 	{
-		subscribedCallbacks.push_back(std::move(delegate));
+		subscribedCallbacks.insert({ ++lastID, std::move(delegate) });
+
+		return lastID;
 	};
+
+	void RemoveCallback(int id)
+	{
+		auto iterator = subscribedCallbacks.find(id);
+		if (iterator != subscribedCallbacks.end()) subscribedCallbacks.erase(iterator);
+	}
 
 	void Call()
 	{
 		for (auto callback : subscribedCallbacks)
 		{
-			callback.Call();
+			callback.second.Call();
 		}
 	};
 
 private:
-	std::list<Delegate<void>> subscribedCallbacks;
+	std::map<int, Delegate<void>> subscribedCallbacks;
+	int lastID = -1;
 };

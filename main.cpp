@@ -14,7 +14,7 @@ public:
     {
         std::function<void(void)> function = std::bind(&Foo::TriggeredVoid, this);
         Delegate<void> delegate(function);
-        dispatcher->SubscribeCallback(std::move(delegate));
+        callbackID = dispatcher->SubscribeCallback(std::move(delegate));
     };
     ~Foo() = default;
 
@@ -23,23 +23,26 @@ public:
         std::cout << "A triggered " << value << std::endl;
     };
 
-    void Triggered(int asd)
+    void Triggered(int first)
     {
-        std::cout << "A triggered " << asd << std::endl;
+        std::cout << "A triggered " << first << std::endl;
     };
 
-    void Triggered(int asd, int dos)
+    void Triggered(int first, int second)
     {
-        std::cout << "A triggered " << asd << dos << std::endl;
+        std::cout << "A triggered " << first << second << std::endl;
     };
 
 private:
     int value = 0;
+    int callbackID = -1;
 };
 
 int main()
 {
-    dispatcher = new  EventDispatcher<void>();
+    dispatcher = new EventDispatcher<void>();
+
+    EventDispatcher<void, int, int> intDispatcher;
 
     Foo foo(1);
 
@@ -55,9 +58,30 @@ int main()
     delegateVoid.Call();
     delegateVoid2.Call();
 
-    dispatcher->SubscribeCallback(std::move(delegateVoid));
-
+    std::cout << "----- START VOID DISPATCHER -----\n";
+    
+    int callbackID = dispatcher->SubscribeCallback(std::move(delegateVoid));
     dispatcher->Call();
 
+    std::cout << "Removing one callback\n";
+    
+    dispatcher->RemoveCallback(callbackID);
+    dispatcher->Call();
+
+    std::cout << "----- END VOID DISPATCHER -----\n";
+
+    std::cout << "----- START INT DISPATCHER -----\n";
+
+    int intID1 = intDispatcher.SubscribeCallback(std::move(delegate));
+    int intID2 = intDispatcher.SubscribeCallback(std::move(delegate2));
+    intDispatcher.Call(1, 2);
+
+    std::cout << "Removing one callback\n";
+
+    intDispatcher.RemoveCallback(intID2);
+    intDispatcher.Call(0, 0);
+
+    std::cout << "----- END INT DISPATCHER -----\n";
+    
     delete dispatcher;
 }
