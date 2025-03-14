@@ -22,7 +22,7 @@ public:
 
 	ReturnValue Call(Arguments... args)
 	{
-		callback(args...);
+		return callback(args...);
 	}
 	
 private:
