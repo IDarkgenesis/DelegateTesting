@@ -1,7 +1,6 @@
 #pragma once
 
-#include <functional>
-#include <vector>
+#include "Delegate.h"
 
 
 template<typename ReturnValue, typename... Arguments>
@@ -11,9 +10,9 @@ public:
 	EventDispatcher() = default;
 	~EventDispatcher() { subscribedCallbacks.clear(); };
 
-	void SubscribeCallback(const std::function<ReturnValue(Arguments...)>& functionCallback)
+	void SubscribeCallback(Delegate<ReturnValue(Arguments...)>& delegate)
 	{
-		subscribedCallbacks.push_back(functionCallback);
+		subscribedCallbacks.push_back(delegate);
 	};
 
 	void Call(Arguments... args)
@@ -25,6 +24,6 @@ public:
 	};
 
 private:
-	std::vector<std::function<ReturnValue(Arguments...)>> subscribedCallbacks;
+	std::vector<Delegate<ReturnValue(Arguments...)>> subscribedCallbacks;
 };
 

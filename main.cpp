@@ -1,25 +1,21 @@
-// DelegateTesting.cpp : This file contains the 'main' function. Program execution begins and ends there.
-//
 
 #include <iostream>
 
 #include "EventDispatcher.h"
 
-extern EventDispatcher<void>* dispatcher;
+//extern EventDispatcher<void()>* dispatcher;
+//
+//EventDispatcher<void()>* dispatcher = nullptr;
 
-EventDispatcher<void>* dispatcher = nullptr;
-
-class A
+class Foo
 {
 public:
-    A(int newVal) : value(newVal) 
+    Foo(int newVal) : value(newVal)
     {
-        std::function<void(void)> triggerCallback = std::bind(&A::TriggeredV, this);
-        dispatcher->SubscribeCallback(triggerCallback);
     };
-    ~A() = default;
+    ~Foo() = default;
 
-    void TriggeredV()
+    void TriggeredVoid()
     {
         std::cout << "A triggered " << value << std::endl;
     };
@@ -38,54 +34,28 @@ private:
     int value = 0;
 };
 
-class B
-{
-public:
-    B(int newVal) : value(newVal) {};
-    ~B() = default;
-
-    void Triggered()
-    {
-        std::cout << "B triggered" << value << std::endl;
-    };
-
-private:
-    int value = 0;
-};
-
 int main()
 {
-    dispatcher = new  EventDispatcher<void>();
+    //dispatcher = new  EventDispatcher<void()>();
 
-    A classA(1);
-    B classB(2);
+    Foo foo(1);
 
-    std::function<void(void)> aTrigger = [&classA](void) {classA.TriggeredV(); };
-    std::function<void(int)> aTrigger2 = [&classA](int x) {classA.Triggered(x); };
-    std::function<void(int, int)> aTrigger3 = [&classA](int x, int y) {classA.Triggered(x, y); };
+    std::function<void(void)> function1 = [&foo](void) {foo.TriggeredVoid(); };
+    std::function<void(int)> function2 = [&foo](int x) {foo.Triggered(x); };
+    std::function<void(int, int)> function3 = [&foo](int x, int y) {foo.Triggered(x, y); };
+    std::function<void(int, int)> function4 = [&foo](int x, int y) {foo.Triggered(x, y); };
 
-    EventDispatcher<void, int> intDispatcher;
-    EventDispatcher<void, int, int> d2;
+    Delegate<void, int, int> delegate([&foo](int x, int y) {foo.Triggered(x, y); });
+    Delegate<void, int, int> delegate2([&foo](int x, int y) {foo.Triggered(x, y); });
+    Delegate<void> delegateVoid(function1);
+    Delegate<void> delegateVoid2([&foo](void) {foo.TriggeredVoid(); });
 
-    intDispatcher.SubscribeCallback(aTrigger2);
-    intDispatcher.Call(2);
+    delegate(1, 2);
+    delegate2(3, 4);
+    delegateVoid();
+    delegateVoid2();
 
-    d2.SubscribeCallback(aTrigger3);
-    d2.Call(2,3);
+    //dispatcher->Call();
 
-    dispatcher->SubscribeCallback(aTrigger);
-    dispatcher->Call();
-
-    delete dispatcher;
+    //delete dispatcher;
 }
-
-// Run program: Ctrl + F5 or Debug > Start Without Debugging menu
-// Debug program: F5 or Debug > Start Debugging menu
-
-// Tips for Getting Started: 
-//   1. Use the Solution Explorer window to add/manage files
-//   2. Use the Team Explorer window to connect to source control
-//   3. Use the Output window to see build output and other messages
-//   4. Use the Error List window to view errors
-//   5. Go to Project > Add New Item to create new code files, or Project > Add Existing Item to add existing code files to the project
-//   6. In the future, to open this project again, go to File > Open > Project and select the .sln file
