@@ -70,7 +70,7 @@ int main()
 	delegateVoid.Call();
 	delegateVoid2.Call();
 
-	int asd = delegateInt2.Call(1, 2);
+	int delegateResult = delegateInt2.Call(1, 2);
 
 	std::cout << "----- END SINGLE DELEGATES -----\n";
 
