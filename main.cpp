@@ -18,7 +18,7 @@ class Foo
     };
     ~Foo() = default;
 
-    void TriggeredVoid() { std::cout << "A triggered " << value << std::endl; };
+    void TriggeredVoid() const { std::cout << "A triggered " << value << std::endl; };
 
     void Triggered(int first) { std::cout << "A triggered " << first << std::endl; };
 
@@ -34,7 +34,7 @@ class Foo
 
   private:
     int value      = 0;
-    int callbackID = -1;
+    std::list<Delegate<void>>::iterator callbackID;
 };
 
 int main()
@@ -67,7 +67,7 @@ int main()
 
     std::cout << "----- START VOID DISPATCHER -----\n";
 
-    int callbackID = dispatcher->SubscribeCallback(std::move(delegateVoid));
+    std::list<Delegate<void>>::iterator callbackID = dispatcher->SubscribeCallback(std::move(delegateVoid));
     dispatcher->Call();
     std::cout << "Removing one callback\n";
 
@@ -81,8 +81,8 @@ int main()
     intDispatcher2.SubscribeCallback(std::move(delegateInt2));
     intDispatcher2.Call(3, 5);
 
-    int intID1 = intDispatcher.SubscribeCallback(std::move(delegate));
-    int intID2 = intDispatcher.SubscribeCallback(std::move(delegate2));
+    std::list<Delegate<void, int, int>>::iterator intID1 = intDispatcher.SubscribeCallback(std::move(delegate));
+    std::list<Delegate<void, int, int>>::iterator intID2 = intDispatcher.SubscribeCallback(std::move(delegate2));
     intDispatcher.Call(1, 2);
 
     std::cout << "Removing one callback\n";
